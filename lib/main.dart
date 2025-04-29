@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:taaruf_app/auth/login.dart';
-import 'package:taaruf_app/home/carousel_home.dart';
-
+import 'package:taaruf_app/routes/app_pages.dart';
+import 'package:taaruf_app/routes/app_routes.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
+  usePathUrlStrategy();
   runApp(const MyApp());
 }
 
@@ -20,11 +21,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const CarouselHome(),
-        '/login': (context) => const LoginPage(), // Pastikan class LoginPage sudah dibuat
-      },
+      initialRoute: AppRoutes.home,
+      getPages: AppPages.pages,
     );
   }
 }

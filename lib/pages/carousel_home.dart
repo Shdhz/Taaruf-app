@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../routes/app_routes.dart';
 
 class CarouselHome extends StatefulWidget {
   const CarouselHome({super.key});
@@ -30,7 +32,7 @@ class _CarouselHomeState extends State<CarouselHome> {
   ];
 
   void goTologin(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/login');
+    Get.offNamed(AppRoutes.login);
   }
 
   @override
