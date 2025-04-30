@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../routes/app_routes.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,14 +15,14 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  
+
   @override
   Widget build(BuildContext context) {
     // Dapatkan ukuran layar untuk responsivitas
     final Size screenSize = MediaQuery.of(context).size;
     final double paddingHorizontal = screenSize.width > 600 ? 60.0 : 24.0;
     final double logoHeight = screenSize.height * 0.12; // 12% dari tinggi layar
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -27,62 +30,67 @@ class _LoginPageState extends State<LoginPage> {
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: paddingHorizontal,
-              vertical: 24.0
+              vertical: 24.0,
             ),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: screenSize.height - 100, 
-              ),
+              constraints: BoxConstraints(minHeight: screenSize.height - 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Tombol kembali
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.green, size: 28),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.green,
+                      size: 28,
+                    ),
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/');
                     },
                     padding: EdgeInsets.zero,
                     alignment: Alignment.centerLeft,
                   ),
-                  
-                  SizedBox(height: screenSize.height * 0.02), 
+
+                  SizedBox(height: screenSize.height * 0.02),
                   Center(
-                    child: Image.asset('images/wedding_ring.png', height: logoHeight),
+                    child: Image.asset(
+                      'images/wedding_ring.png',
+                      height: logoHeight,
+                    ),
                   ),
-                  
+
                   SizedBox(height: screenSize.height * 0.03),
-                  
-                  const Center(
+
+                  Center(
                     child: Text(
                       'Selamat Datang Kembali',
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
                       ),
                     ),
                   ),
-                  
+
                   Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         vertical: 12.0,
-                        horizontal: screenSize.width * 0.05, 
+                        horizontal: screenSize.width * 0.05,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Masuk untuk melanjutkan perjalanan taaruf Anda',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           color: Colors.black54,
                         ),
                       ),
                     ),
                   ),
-                  
-                  SizedBox(height: screenSize.height * 0.04), 
-                  
+
+                  SizedBox(height: screenSize.height * 0.04),
+
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -107,21 +115,31 @@ class _LoginPageState extends State<LoginPage> {
                             hintText: 'Email',
                             filled: true,
                             fillColor: Colors.grey.shade50,
-                            prefixIcon: Icon(BoxIcons.bx_envelope, color: Colors.green.shade400),
+                            prefixIcon: Icon(
+                              BoxIcons.bx_envelope,
+                              color: Colors.green.shade400,
+                            ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade200),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.green, width: 1.5),
+                              borderSide: const BorderSide(
+                                color: Colors.green,
+                                width: 1.5,
+                              ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Password field
                         TextField(
                           controller: _passwordController,
@@ -130,10 +148,15 @@ class _LoginPageState extends State<LoginPage> {
                             hintText: 'Password',
                             filled: true,
                             fillColor: Colors.grey.shade50,
-                            prefixIcon: Icon(BoxIcons.bx_lock, color: Colors.green.shade400),
+                            prefixIcon: Icon(
+                              BoxIcons.bx_lock,
+                              color: Colors.green.shade400,
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                                _isPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                                 color: Colors.grey.shade600,
                               ),
                               onPressed: () {
@@ -144,16 +167,23 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade200),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.green, width: 1.5),
+                              borderSide: const BorderSide(
+                                color: Colors.green,
+                                width: 1.5,
+                              ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                           ),
                         ),
-                        
+
                         // Forgot password
                         Align(
                           alignment: Alignment.centerRight,
@@ -163,23 +193,23 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             child: Text(
                               'Lupa password?',
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 color: Colors.green.shade700,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 10),
-                        
+
                         // Login button
                         SizedBox(
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
                             onPressed: () {
-                              // Implementasi login 
+                              Get.offNamed(AppRoutes.beranda);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -189,9 +219,9 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'MASUK',
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -201,72 +231,72 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: screenSize.height * 0.03),
-                  
+
                   Row(
                     children: [
                       Expanded(
-                        child: Divider(color: Colors.grey.shade300, thickness: 1),
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'Atau',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: GoogleFonts.poppins(color: Colors.grey.shade600),
                         ),
                       ),
                       Expanded(
-                        child: Divider(color: Colors.grey.shade300, thickness: 1),
+                        child: Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                        ),
                       ),
                     ],
                   ),
-                  
-                  SizedBox(height: screenSize.height * 0.03), 
-                  
+
+                  SizedBox(height: screenSize.height * 0.03),
+
                   // Social login buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildSocialButton(
-                        child: Brand(
-                          Brands.google, 
-                          size: 24,
-                        ),
+                        child: Brand(Brands.google, size: 24),
                         onTap: () {
                           // Implementasi Google login
                         },
                       ),
                       const SizedBox(width: 20),
                       _buildSocialButton(
-                        child: Brand(
-                          Brands.whatsapp,
-                          size: 24,
-                        ),
+                        child: Brand(Brands.whatsapp, size: 24),
                         onTap: () {
                           // Implementasi whatsapp login
                         },
                       ),
                     ],
                   ),
-                  
+
                   SizedBox(height: screenSize.height * 0.03),
-                  
+
                   // Register link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Belum memiliki akun?',
-                        style: TextStyle(color: Colors.grey.shade700),
+                        style: GoogleFonts.poppins(color: Colors.grey.shade700),
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigasi ke halaman registrasi
+                          Get.toNamed(AppRoutes.register);
                         },
-                        child: const Text(
+                        child: Text(
                           'Daftar',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
@@ -282,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-  
+
   Widget _buildSocialButton({
     required Widget child,
     required VoidCallback onTap,
@@ -298,7 +328,7 @@ class _LoginPageState extends State<LoginPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 3,
               offset: const Offset(0, 1),
@@ -309,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-  
+
   @override
   void dispose() {
     _emailController.dispose();
