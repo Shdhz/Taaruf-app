@@ -3,6 +3,7 @@ import 'package:taaruf_app/auth/login.dart';
 import 'package:taaruf_app/pages/beranda.dart';
 import 'package:taaruf_app/pages/carousel_home.dart';
 import '../auth/register.dart';
+import '../pages/find_couple.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -22,6 +23,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterPage(),
+    ),
+    GetPage(
+      name: AppRoutes.homepage,
+      page: () => const Beranda(),
+    ),
+    GetPage(
+      name: AppRoutes.explore,
+      page: () => const FindCouple(),
     ),
   ];
 }

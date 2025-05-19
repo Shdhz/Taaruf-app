@@ -207,11 +207,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Brand(Brands.google, size: 24),
                       onTap: () {},
                     ),
-                    const SizedBox(width: 20),
-                    _buildSocialButton(
-                      child: Brand(Brands.whatsapp, size: 24),
-                      onTap: () {},
-                    ),
                   ],
                 ),
                 SizedBox(height: screenSize.height * 0.03),

@@ -270,13 +270,6 @@ class _LoginPageState extends State<LoginPage> {
                           // Implementasi Google login
                         },
                       ),
-                      const SizedBox(width: 20),
-                      _buildSocialButton(
-                        child: Brand(Brands.whatsapp, size: 24),
-                        onTap: () {
-                          // Implementasi whatsapp login
-                        },
-                      ),
                     ],
                   ),
 
