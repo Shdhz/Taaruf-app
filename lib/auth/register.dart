@@ -42,7 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 IconButton(
                   icon: const Icon(
                     Icons.arrow_back,
-                    color: Colors.green,
+                    color: Colors.deepPurple,
                     size: 28,
                   ),
                   onPressed: () => Get.back(),
@@ -63,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ),
@@ -90,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.deepPurple.withOpacity(0.1),
                         spreadRadius: 1,
                         blurRadius: 10,
                         offset: const Offset(0, 2),
@@ -156,7 +156,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _agreeToTerms = value ?? false;
                               });
                             },
-                            activeColor: Colors.green,
+                            activeColor: Colors.deepPurple,
                           ),
                           Expanded(
                             child: Text(
@@ -177,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           onPressed:
                               _agreeToTerms ? _validateAndRegister : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                            backgroundColor: Colors.deepPurple,
                             foregroundColor: Colors.white,
                             elevation: 2,
                             shape: RoundedRectangleBorder(
@@ -222,7 +222,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Text(
                         'Masuk',
                         style: GoogleFonts.poppins(
-                          color: Colors.green,
+                          color: Colors.deepPurple,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -254,14 +254,14 @@ class _RegisterPageState extends State<RegisterPage> {
       hintText: hint,
       filled: true,
       fillColor: Colors.grey.shade50,
-      prefixIcon: Icon(icon, color: Colors.green.shade400),
+      prefixIcon: Icon(icon, color: Colors.deepPurple.shade400),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.green, width: 1.5),
+        borderSide: const BorderSide(color: Colors.deepPurple, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 16),
     );

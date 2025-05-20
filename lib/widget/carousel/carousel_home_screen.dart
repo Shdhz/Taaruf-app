@@ -48,7 +48,7 @@ class CarouselCard extends StatelessWidget {
                 width: currentIndex == i ? 14 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: currentIndex == i ? Colors.green : Colors.grey[300],
+                  color: currentIndex == i ? Colors.deepPurple : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -62,7 +62,7 @@ class CarouselCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: Colors.green,
+                  color: Colors.deepPurple,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -88,7 +88,7 @@ class CarouselCard extends StatelessWidget {
                   child: Text(
                     'LEWATI',
                     style: GoogleFonts.poppins(
-                      color: Colors.green,
+                      color: Colors.deepPurple,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -97,7 +97,7 @@ class CarouselCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onNext,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Colors.deepPurple,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

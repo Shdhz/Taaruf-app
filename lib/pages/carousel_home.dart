@@ -15,7 +15,7 @@ class _CarouselHomeState extends State<CarouselHome> {
   int _currentIndex = 0;
 
   final List<String> images = [
-    'images/jodoh_halal.png',
+    'images/jodoh_halal2.png',
     'images/gambar.jpg',
     'images/logo.png',
   ];
@@ -29,7 +29,7 @@ class _CarouselHomeState extends State<CarouselHome> {
   final List<String> descList = [
     'Bersama Taaruf App, proses taaruf jadi lebih aman dan nyaman.',
     'Bangun komunikasi yang sehat dan sesuai syariat.',
-    'Ayo mulai langkah pertamamu menuju keluarga sakinah.',
+    'Terserah jodohmu orang mana, asal jangan orang israel, Paham!',
   ];
 
   void goTologin(BuildContext context) {

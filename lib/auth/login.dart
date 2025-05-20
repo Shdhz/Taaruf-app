@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
                   IconButton(
                     icon: const Icon(
                       Icons.arrow_back,
-                      color: Colors.green,
+                      color: Colors.deepPurple,
                       size: 28,
                     ),
                     onPressed: () {
@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Colors.deepPurple,
                       ),
                     ),
                   ),
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.deepPurple.withOpacity(0.1),
                           spreadRadius: 1,
                           blurRadius: 10,
                           offset: const Offset(0, 2),
@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                             fillColor: Colors.grey.shade50,
                             prefixIcon: Icon(
                               BoxIcons.bx_envelope,
-                              color: Colors.green.shade400,
+                              color: Colors.deepPurple.shade400,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -128,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Colors.green,
+                                color: Colors.deepPurple,
                                 width: 1.5,
                               ),
                             ),
@@ -150,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                             fillColor: Colors.grey.shade50,
                             prefixIcon: Icon(
                               BoxIcons.bx_lock,
-                              color: Colors.green.shade400,
+                              color: Colors.deepPurple.shade400,
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -174,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Colors.green,
+                                color: Colors.deepPurple,
                                 width: 1.5,
                               ),
                             ),
@@ -194,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'Lupa password?',
                               style: GoogleFonts.poppins(
-                                color: Colors.green.shade700,
+                                color: Colors.deepPurple.shade700,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -212,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                               Get.offNamed(AppRoutes.beranda);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
                               elevation: 2,
                               shape: RoundedRectangleBorder(
@@ -290,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(
                           'Daftar',
                           style: GoogleFonts.poppins(
-                            color: Colors.green,
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
