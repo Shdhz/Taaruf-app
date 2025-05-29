@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
+// import 'package:icons_plus/icons_plus.dart';
 
 import '../theme/app_text_style.dart';
 import '../widget/bottomnav/bottom_nav.dart';
@@ -61,21 +61,17 @@ class _BerandaState extends State<Beranda> {
                 ),
                 child: Row(
                   children: [
-                    Container(
+                    buildClickableOvalImage(
+                      imagePath: 'images/download.jpg',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Gambar berhasil kamu klik'),
+                          ),
+                        );
+                      },
+                      size: 80,
                       margin: const EdgeInsets.all(10),
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1,
-                        ),
-                        image: const DecorationImage(
-                          image: AssetImage('images/download.jpg'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -157,12 +153,18 @@ class _BerandaState extends State<Beranda> {
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 20,
                   children: [
-                    _buildMenuItem(Icons.settings, 'Pengaturan'),
-                    _buildMenuItem(Icons.help, 'Bantuan'),
-                    _buildMenuItem(Icons.report, 'Laporkan'),
-                    _buildMenuItem(Icons.person, 'Profil'),
-                    _buildMenuItem(Icons.logout, 'Keluar'),
-                    _buildMenuItem(Icons.auto_stories, 'Cara kerja'),
+                    _buildMenuItem(Icons.settings, 'Pengaturan', () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Pengaturan berhasil kamu klik"),
+                        ),
+                      );
+                    }),
+                    _buildMenuItem(Icons.help, 'Bantuan', () {}),
+                    _buildMenuItem(Icons.report, 'Laporkan', () {}),
+                    _buildMenuItem(Icons.person, 'Profil', () {}),
+                    _buildMenuItem(Icons.logout, 'Keluar', () {}),
+                    _buildMenuItem(Icons.auto_stories, 'Cara kerja', () {}),
                   ],
                 ),
               ),
@@ -175,26 +177,70 @@ class _BerandaState extends State<Beranda> {
   }
 }
 
-Widget _buildMenuItem(IconData icon, String label) {
-  return SizedBox(
-    child: Column(
-      children: [
-        CircleAvatar(
-          radius: 28,
-          backgroundColor: const Color.fromARGB(255, 239, 236, 245),
-          child: Icon(
-            icon,
-            color: const Color.fromARGB(255, 168, 124, 243),
-            size: 28,
+// Menu item
+Widget _buildMenuItem(IconData icon, String label, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: SizedBox(
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: const Color.fromARGB(255, 239, 236, 245),
+            child: Icon(
+              icon,
+              color: const Color.fromARGB(255, 168, 124, 243),
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// Profil
+Widget buildClickableOvalImage({
+  required String imagePath,
+  required VoidCallback onTap,
+  double size = 70.0,
+  EdgeInsetsGeometry margin = const EdgeInsets.all(10.0),
+  Color borderColor = Colors.grey,
+  double borderWidth = 1.0,
+}) {
+  final resolvedBorderColor = Colors.grey.shade300;
+
+  return Container(
+    margin: margin, // Margin di luar area yang bisa diklik dan oval
+    width: size, // Lebar total untuk area oval
+    height: size, // Tinggi total untuk area oval
+    child: ClipOval(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: resolvedBorderColor,
+                width: borderWidth,
+              ),
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 13),
-        ),
-      ],
+      ),
     ),
   );
 }

@@ -18,6 +18,12 @@ class BottomNavController extends GetxController {
       case 1:
         Get.offNamed(AppRoutes.explore);
         break;
+      case 2:
+        Get.offNamed(AppRoutes.profile);
+        break;
+      case 3:
+        Get.offNamed(AppRoutes.profile);
+        break;
     }
   }
 }

@@ -16,8 +16,8 @@ class _CarouselHomeState extends State<CarouselHome> {
 
   final List<String> images = [
     'images/jodoh_halal2.png',
-    'images/gambar.jpg',
-    'images/logo.png',
+    'images/Kenali_lebih_dekat.png',
+    'images/mulai_perjalanan_cinta.png',
   ];
 
   final List<String> titleList = [
