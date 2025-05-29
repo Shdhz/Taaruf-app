@@ -12,13 +12,111 @@ class Beranda extends StatefulWidget {
 }
 
 class _BerandaState extends State<Beranda> {
+  // DATA CONFIGURATION - Ubah data di sini
+  final String profileImagePath = "images/download.jpg";
+  final String userName = "Dhafa alfareza";
+  final String userEmail = "dhafa@gmail.com";
+  final String membershipType = "Gold Member";
+  final Color membershipBadgeColor = Color.fromARGB(255, 252, 243, 218);
+  final String appTitle = "Home";
+  final String buttonText = "CV Taaruf";
+  
+  // Menu Configuration
+  final List<Map<String, dynamic>> menuConfig = [
+    {
+      'icon': Icons.settings,
+      'label': 'Pengaturan',
+      'action': 'settings',
+      'enabled': true,
+    },
+    {
+      'icon': Icons.help,
+      'label': 'Bantuan',
+      'action': 'help',
+      'enabled': true,
+    },
+    {
+      'icon': Icons.report,
+      'label': 'Laporkan',
+      'action': 'report',
+      'enabled': true,
+    },
+    {
+      'icon': Icons.person,
+      'label': 'Profil',
+      'action': 'profile',
+      'enabled': true,
+    },
+    {
+      'icon': Icons.logout,
+      'label': 'Keluar',
+      'action': 'logout',
+      'enabled': true,
+    },
+    {
+      'icon': Icons.auto_stories,
+      'label': 'Cara kerja',
+      'action': 'how_to',
+      'enabled': true,
+    },
+  ];
+
+  // Messages Configuration
+  final String profileImageClickMessage = "Gambar berhasil kamu klik";
+  final String settingsClickMessage = "Pengaturan berhasil kamu klik";
+  // END DATA CONFIGURATION
+
   int selectedIndex = 0;
+
+  void _handleMenuTap(String action) {
+    switch (action) {
+      case 'settings':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(settingsClickMessage)),
+        );
+        break;
+      case 'help':
+        // Navigate to help page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$action berhasil diklik")),
+        );
+        break;
+      case 'report':
+        // Navigate to report page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$action berhasil diklik")),
+        );
+        break;
+      case 'profile':
+        // Navigate to profile page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$action berhasil diklik")),
+        );
+        break;
+      case 'logout':
+        // Handle logout
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$action berhasil diklik")),
+        );
+        break;
+      case 'how_to':
+        // Navigate to how-to page
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$action berhasil diklik")),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Aksi tidak dikenali")),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home', style: TextStyle(color: Colors.deepPurple)),
+        title: Text(appTitle, style: TextStyle(color: Colors.deepPurple)),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         actions: [
@@ -36,8 +134,8 @@ class _BerandaState extends State<Beranda> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'CV Taaruf',
+              child: Text(
+                buttonText,
                 style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
               ),
             ),
@@ -62,11 +160,11 @@ class _BerandaState extends State<Beranda> {
                 child: Row(
                   children: [
                     buildClickableOvalImage(
-                      imagePath: 'images/download.jpg',
+                      imagePath: profileImagePath,
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Gambar berhasil kamu klik'),
+                          SnackBar(
+                            content: Text(profileImageClickMessage),
                           ),
                         );
                       },
@@ -78,10 +176,10 @@ class _BerandaState extends State<Beranda> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Agus Rohmat', style: AppTextStyle.h3),
+                          Text(userName, style: AppTextStyle.h3),
                           const SizedBox(height: 4),
                           Text(
-                            'agus@gmail.com',
+                            userEmail,
                             style: AppTextStyle.bodyMedium.copyWith(
                               color: Colors.grey.shade600,
                             ),
@@ -95,12 +193,7 @@ class _BerandaState extends State<Beranda> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                    255,
-                                    252,
-                                    243,
-                                    218,
-                                  ),
+                                  color: membershipBadgeColor,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -112,7 +205,7 @@ class _BerandaState extends State<Beranda> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Gold Member',
+                                      membershipType,
                                       style: AppTextStyle.bodySmall.copyWith(
                                         color: const Color.fromARGB(
                                           255,
@@ -146,26 +239,23 @@ class _BerandaState extends State<Beranda> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: GridView.count(
-                  crossAxisCount: 3,
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 20,
+                  ),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 20,
-                  children: [
-                    _buildMenuItem(Icons.settings, 'Pengaturan', () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Pengaturan berhasil kamu klik"),
-                        ),
-                      );
-                    }),
-                    _buildMenuItem(Icons.help, 'Bantuan', () {}),
-                    _buildMenuItem(Icons.report, 'Laporkan', () {}),
-                    _buildMenuItem(Icons.person, 'Profil', () {}),
-                    _buildMenuItem(Icons.logout, 'Keluar', () {}),
-                    _buildMenuItem(Icons.auto_stories, 'Cara kerja', () {}),
-                  ],
+                  itemCount: menuConfig.length,
+                  itemBuilder: (context, index) {
+                    final menu = menuConfig[index];
+                    return _buildMenuItem(
+                      menu['icon'],
+                      menu['label'],
+                      menu['enabled'] ? () => _handleMenuTap(menu['action']) : null,
+                    );
+                  },
                 ),
               ),
             ],
@@ -178,10 +268,11 @@ class _BerandaState extends State<Beranda> {
 }
 
 // Menu item
-Widget _buildMenuItem(IconData icon, String label, VoidCallback onTap) {
+Widget _buildMenuItem(IconData icon, String label, VoidCallback? onTap) {
   return GestureDetector(
     onTap: onTap,
-    child: SizedBox(
+    child: Opacity(
+      opacity: onTap != null ? 1.0 : 0.5,
       child: Column(
         children: [
           CircleAvatar(

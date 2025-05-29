@@ -11,7 +11,7 @@ class Profile extends StatelessWidget {
     final String name = "Dhafa Alfareza";
     final int age = 31;
     final String gender = "male";
-    final String job = "Entrepreneur";
+    final String job = "Programmer";
 
     IconData genderIcon = gender == "male" ? Icons.male : Icons.female;
 
@@ -52,7 +52,7 @@ class Profile extends StatelessWidget {
                       radius: 70,
                       backgroundImage: NetworkImage(profileImageUrl),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       name,
                       style: const TextStyle(
@@ -121,7 +121,7 @@ class Profile extends StatelessWidget {
                   vertical: 12,
                 ),
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEDE7F6),
                     shape: BoxShape.circle,
@@ -172,7 +172,7 @@ class Profile extends StatelessWidget {
                   vertical: 12,
                 ),
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFEBEE),
                     shape: BoxShape.circle,
