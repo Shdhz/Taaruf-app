@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:taaruf_app/main.dart';
 import '../routes/app_routes.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,7 +17,21 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final RxBool isLoading = false.obs;
+  final RxBool isGoogleLoading = false.obs;
   bool _isPasswordVisible = false;
+
+  String? _userId;
+
+  @override
+  void initState() {
+    super.initState();
+    supabase.auth.onAuthStateChange.listen((data) {
+      setState(() {
+        _userId = data.session?.user.id;
+      });
+    });
+  }
 
   // Fungsi login (siap integrasi dengan Supabase)
   Future<void> loginUser() async {
@@ -22,7 +39,12 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Email dan password wajib diisi');
+      Get.snackbar(
+        'Error',
+        'Email dan password wajib diisi',
+        backgroundColor: Colors.amber[100],
+        colorText: Colors.black,
+      );
       return;
     }
 
@@ -43,6 +65,43 @@ class _LoginPageState extends State<LoginPage> {
       Get.offNamed(AppRoutes.beranda);
     } catch (e) {
       Get.snackbar('Login Gagal', e.toString());
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    isGoogleLoading.value = true;
+
+    try {
+      const webClientId =
+          '866202077954-akl5bgo01vhm27g4ih75f7mssg4om1it.apps.googleusercontent.com';
+
+      final googleUser =
+          await GoogleSignIn(serverClientId: webClientId).signIn();
+          
+
+      if (googleUser == null) return;
+
+      final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (accessToken == null || idToken == null) {
+        throw 'Token Google tidak ditemukan';
+      }
+
+      final response = await supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      if (response.user == null) throw 'Login ke Supabase gagal: User null';
+
+      Get.offNamed(AppRoutes.beranda);
+    } catch (e) {
+      Get.snackbar('Login Gagal', e.toString());
+    } finally {
+      isGoogleLoading.value = false;
     }
   }
 
@@ -284,19 +343,26 @@ class _LoginPageState extends State<LoginPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildSocialButton(
-          child: Brand(Brands.google, size: 24),
-          onTap: () {
-            // TODO: Tambahkan login Google via Supabase
-          },
-        ),
+        Obx(() {
+          return _buildSocialButton(
+            child:
+                isGoogleLoading.value
+                    ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : Brand(Brands.google, size: 24),
+            onTap: isGoogleLoading.value ? null : loginWithGoogle,
+          );
+        }),
       ],
     );
   }
 
   Widget _buildSocialButton({
     required Widget child,
-    required VoidCallback onTap,
+    required Future<void> Function()? onTap,
   }) {
     return InkWell(
       onTap: onTap,

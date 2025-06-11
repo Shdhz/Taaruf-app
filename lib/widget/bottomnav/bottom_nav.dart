@@ -3,36 +3,24 @@ import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import '../../routes/app_routes.dart';
-
-class BottomNavController extends GetxController {
-  RxInt currentIndex = 0.obs;
-
-  void changeIndex(int index) {
-    currentIndex.value = index;
-
-    // Logic controller for navigation
-    switch (index) {
-      case 0:
-        Get.offNamed(AppRoutes.beranda);
-        break;
-      case 1:
-        Get.offNamed(AppRoutes.explore);
-        break;
-      case 2:
-        Get.offNamed(AppRoutes.history);
-        break;
-      case 3:
-        Get.offNamed(AppRoutes.profile);
-        break;
-    }
-  }
-}
+import 'BottomNavController.dart'; // pastikan import controller
 
 class CustomBottomNav extends StatelessWidget {
   CustomBottomNav({super.key});
 
-  final BottomNavController controller = Get.put(BottomNavController(), permanent: true);
+  final BottomNavController controller = Get.put(
+    BottomNavController(),
+    permanent: true,
+  );
+
   final Duration _animationDuration = const Duration(milliseconds: 400);
+
+  final List<String> _routes = [
+    AppRoutes.beranda,
+    AppRoutes.explore,
+    AppRoutes.history,
+    AppRoutes.profile,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,44 +30,30 @@ class CustomBottomNav extends StatelessWidget {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         currentIndex: controller.currentIndex.value,
-        onTap: controller.changeIndex,
+        onTap: (index) {
+          // Step 1: Update index
+          controller.changeIndex(index);
+
+          // Step 2: Tunda navigasi satu frame
+          Future.microtask(() => Get.offNamed(_routes[index]));
+        },
         backgroundColor: Colors.white,
         elevation: 0,
         items: [
           BottomNavigationBarItem(
-            icon: _buildAnimatedIcon(
-              context,
-              BoxIcons.bx_home,
-              BoxIcons.bx_home,
-              0,
-            ),
+            icon: _buildAnimatedIcon(context, BoxIcons.bx_home, 0),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: _buildAnimatedIcon(
-              context,
-              BoxIcons.bx_compass,
-              BoxIcons.bx_compass,
-              1,
-            ),
+            icon: _buildAnimatedIcon(context, BoxIcons.bx_compass, 1),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: _buildAnimatedIcon(
-              context,
-              BoxIcons.bx_history,
-              BoxIcons.bx_history,
-              2,
-            ),
+            icon: _buildAnimatedIcon(context, BoxIcons.bx_history, 2),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: _buildAnimatedIcon(
-              context,
-              BoxIcons.bx_user,
-              BoxIcons.bx_user,
-              3,
-            ),
+            icon: _buildAnimatedIcon(context, BoxIcons.bx_user, 3),
             label: '',
           ),
         ],
@@ -89,8 +63,7 @@ class CustomBottomNav extends StatelessWidget {
 
   Widget _buildAnimatedIcon(
     BuildContext context,
-    IconData inactiveIcon,
-    IconData activeIcon,
+    IconData iconData,
     int index,
   ) {
     bool isActive = controller.currentIndex.value == index;
@@ -100,19 +73,14 @@ class CustomBottomNav extends StatelessWidget {
       curve: Curves.easeInOut,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color:
-            isActive
-                ? Theme.of(context).primaryColor.withOpacity(0.15)
-                : Colors.transparent,
+        color: isActive
+            ? Theme.of(context).primaryColor.withOpacity(0.15)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: AnimatedCrossFade(
-        firstChild: Icon(inactiveIcon, size: 30, color: Colors.grey),
-        secondChild: Icon(
-          activeIcon,
-          size: 30,
-          color: Theme.of(context).primaryColor,
-        ),
+        firstChild: Icon(iconData, size: 30, color: Colors.grey),
+        secondChild: Icon(iconData, size: 30, color: Theme.of(context).primaryColor),
         crossFadeState:
             isActive ? CrossFadeState.showSecond : CrossFadeState.showFirst,
         duration: _animationDuration,

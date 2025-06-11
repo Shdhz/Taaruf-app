@@ -10,4 +10,7 @@ abstract class AppRoutes {
   static const String explore = '/explore';
   static const String profile = '/profile';
   static const String history = '/history';
+
+  // Route Detail user
+  static const String detailProfile = '/detail-profile';
 }

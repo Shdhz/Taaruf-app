@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:taaruf_app/routes/app_pages.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
 import 'package:taaruf_app/theme/app_theme.dart';
+import 'package:taaruf_app/widget/bottomnav/BottomNavController.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,9 +23,11 @@ Future<void> main() async {
   } catch (e) {
     rethrow;
   }
-
+  Get.put(BottomNavController(), permanent: true);
   runApp(MyApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

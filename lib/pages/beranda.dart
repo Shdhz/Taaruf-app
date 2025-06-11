@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:taaruf_app/main.dart';
+import 'package:taaruf_app/routes/app_routes.dart';
 // import 'package:icons_plus/icons_plus.dart';
 
 import '../theme/app_text_style.dart';
@@ -13,14 +17,14 @@ class Beranda extends StatefulWidget {
 
 class _BerandaState extends State<Beranda> {
   // DATA CONFIGURATION - Ubah data di sini
-  final String profileImagePath = "images/download.jpg";
-  final String userName = "Dhafa alfareza";
-  final String userEmail = "dhafa@gmail.com";
+  late String profileImagePath;
+  String? userName;
+  String? userEmail;
   final String membershipType = "Gold Member";
   final Color membershipBadgeColor = Color.fromARGB(255, 252, 243, 218);
   final String appTitle = "Home";
   final String buttonText = "CV Taaruf";
-  
+
   // Menu Configuration
   final List<Map<String, dynamic>> menuConfig = [
     {
@@ -29,12 +33,7 @@ class _BerandaState extends State<Beranda> {
       'action': 'settings',
       'enabled': true,
     },
-    {
-      'icon': Icons.help,
-      'label': 'Bantuan',
-      'action': 'help',
-      'enabled': true,
-    },
+    {'icon': Icons.help, 'label': 'Bantuan', 'action': 'help', 'enabled': true},
     {
       'icon': Icons.report,
       'label': 'Laporkan',
@@ -60,9 +59,6 @@ class _BerandaState extends State<Beranda> {
       'enabled': true,
     },
   ];
-
-  // Messages Configuration
-  final String profileImageClickMessage = "Gambar berhasil kamu klik";
   final String settingsClickMessage = "Pengaturan berhasil kamu klik";
   // END DATA CONFIGURATION
 
@@ -71,44 +67,62 @@ class _BerandaState extends State<Beranda> {
   void _handleMenuTap(String action) {
     switch (action) {
       case 'settings':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(settingsClickMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(settingsClickMessage)));
         break;
       case 'help':
         // Navigate to help page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$action berhasil diklik")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$action berhasil diklik")));
         break;
       case 'report':
         // Navigate to report page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$action berhasil diklik")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$action berhasil diklik")));
         break;
       case 'profile':
         // Navigate to profile page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$action berhasil diklik")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$action berhasil diklik")));
         break;
       case 'logout':
         // Handle logout
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$action berhasil diklik")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$action berhasil diklik")));
         break;
       case 'how_to':
         // Navigate to how-to page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$action berhasil diklik")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$action berhasil diklik")));
         break;
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Aksi tidak dikenali")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Aksi tidak dikenali")));
+    }
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    getCurrentUser();
+  }
+
+  void getCurrentUser(){
+    final user = supabase.auth.currentUser;
+
+    if (user != null){
+      setState((){
+        profileImagePath = user.userMetadata?['avatar_url'] ?? 'images/default.jpg';
+        userEmail = user.email;
+        userName = user.userMetadata?['name'] ?? ['pengguna'];
+      });
     }
   }
 
@@ -162,11 +176,9 @@ class _BerandaState extends State<Beranda> {
                     buildClickableOvalImage(
                       imagePath: profileImagePath,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(profileImageClickMessage),
-                          ),
-                        );
+                        Get.toNamed(AppRoutes.detailProfile, arguments: {
+                          'photoUrl' : profileImagePath
+                        });
                       },
                       size: 80,
                       margin: const EdgeInsets.all(10),
@@ -176,10 +188,10 @@ class _BerandaState extends State<Beranda> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(userName, style: AppTextStyle.h3),
+                          Text(userName?? 'Loading...', style: AppTextStyle.h3),
                           const SizedBox(height: 4),
                           Text(
-                            userEmail,
+                            userEmail??'-',
                             style: AppTextStyle.bodyMedium.copyWith(
                               color: Colors.grey.shade600,
                             ),
@@ -253,7 +265,9 @@ class _BerandaState extends State<Beranda> {
                     return _buildMenuItem(
                       menu['icon'],
                       menu['label'],
-                      menu['enabled'] ? () => _handleMenuTap(menu['action']) : null,
+                      menu['enabled']
+                          ? () => _handleMenuTap(menu['action'])
+                          : null,
                     );
                   },
                 ),
@@ -325,7 +339,7 @@ Widget buildClickableOvalImage({
                 width: borderWidth,
               ),
               image: DecorationImage(
-                image: AssetImage(imagePath),
+                image: NetworkImage(imagePath),
                 fit: BoxFit.cover,
               ),
             ),
