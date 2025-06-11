@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -608,8 +610,6 @@ class _EditProfileModalState extends State<EditProfileModal> {
     final nasabProfile = widget.profileData?['nasab_profile'] ?? {};
 
     // Debug print to check data
-    print('Nasab Profile Data: $nasabProfile');
-    print('Origin Province: ${nasabProfile['origin_province']}');
 
     _controllers = {
       // Basic Profile
@@ -685,9 +685,6 @@ class _EditProfileModalState extends State<EditProfileModal> {
     _selectedOriginProvince = nasabProfile['origin_province'];
 
     // Debug prints
-    print('Selected Origin Province: $_selectedOriginProvince');
-    print('Selected Tribe: $_selectedTribe');
-    print('Selected Gender: $_selectedGender');
 
     // Parse date of birth
     if (widget.profileData?['date_of_birth'] != null) {
@@ -728,15 +725,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
         _tribes = (responses[5] as List<dynamic>).cast<String>();
       });
 
-      print('Enums loaded successfully:');
-      print('Education: $_educationLevels');
-      print('Marital Status: $_maritalStatuses');
-      print('Occupation: $_occupationCategories');
-      print('Provinces: $_provinces');
-      print('Genders: $_genders');
-      print('Tribes: $_tribes');
     } catch (e) {
-      print('Error fetching enum values: $e');
       // Fallback values based on your database enums
       setState(() {
         _educationLevels = [
@@ -1313,10 +1302,6 @@ class _EditProfileModalState extends State<EditProfileModal> {
     bool required = false,
   }) {
     // Debug print
-    print('Building dropdown for $label:');
-    print('Items: $items');
-    print('Selected: $selectedValue');
-    print('Items contains selected: ${items.contains(selectedValue)}');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),

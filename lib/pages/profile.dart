@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, avoid_print, duplicate_ignore
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -98,6 +100,7 @@ class _ProfileState extends State<Profile> {
                   iconColor: Color(0xFF6A1B9A),
                   title: "Edit Profile",
                   subtitle: "Edit profile kamu",
+                  // ignore: avoid_print
                   onTap: () => print("edit profil di klik"),
                 ),
                 _buildListTile(

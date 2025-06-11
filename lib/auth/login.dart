@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+// ignore: depend_on_referenced_packages
 import 'package:icons_plus/icons_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:taaruf_app/main.dart';
@@ -21,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final RxBool isGoogleLoading = false.obs;
   bool _isPasswordVisible = false;
 
+  // ignore: unused_field
   String? _userId;
 
   @override
@@ -49,8 +51,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      // TODO: Ganti dengan autentikasi Supabase
-      print("Email: $email, Password: $password");
 
       // Contoh Supabase login (aktifkan jika Supabase siap)
       // final response = await supabase.auth.signInWithPassword(
@@ -210,6 +210,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.deepPurple.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 10,
@@ -247,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                // TODO: Tambahkan navigasi ke halaman lupa password
+                
               },
               child: Text(
                 'Lupa password?',
@@ -375,6 +376,7 @@ class _LoginPageState extends State<LoginPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: Colors.black.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 3,

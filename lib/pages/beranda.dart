@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:taaruf_app/main.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
 // import 'package:icons_plus/icons_plus.dart';

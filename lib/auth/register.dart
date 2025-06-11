@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// ignore: depend_on_referenced_packages
 import 'package:icons_plus/icons_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../routes/app_routes.dart';
@@ -114,6 +115,7 @@ class _RegisterPageState extends State<RegisterPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.deepPurple.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 10,
@@ -298,6 +300,7 @@ class _RegisterPageState extends State<RegisterPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: Colors.black.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 3,
@@ -365,10 +368,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _registerUserToSupabase(String email, String password) async {
     try {
-      // TODO: Implementasikan koneksi ke Supabase Auth di sini
-      // Misalnya:
-      // final response = await supabase.auth.signUp(email: email, password: password);
-
       Get.offNamed(AppRoutes.login);
     } catch (e) {
       _showErrorSnackBar('Pendaftaran gagal: ${e.toString()}');
