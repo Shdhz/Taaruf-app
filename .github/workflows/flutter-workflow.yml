@@ -1,0 +1,45 @@
+name: Build & Release APK - Ayo Taaruf
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Flutter APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'  # Gunakan Java 17 untuk Flutter terbaru
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ''  # Atau biarkan kosong untuk versi stable terbaru
+          channel: 'stable'  # Bisa diganti ke 'beta' jika kamu pakai beta
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Format Check
+        run: flutter format --set-exit-if-changed .
+
+      - name: Analyze Code
+        run: flutter analyze
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
