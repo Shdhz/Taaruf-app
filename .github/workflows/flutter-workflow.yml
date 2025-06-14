@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      
+      - name: Create .env from GitHub Secret
+        run: |
+          echo "${{ secrets.ENV }}" | tr -d '\r' > .env
+
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -53,14 +58,28 @@ jobs:
           echo "🔐 APK Certificate SHA-1 Fingerprint"
           echo "================================="
           keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep -E "(SHA1|SHA256)"
-          echo "================================="
-          echo "📋 Copy SHA-1 above to Google Console:"
-          echo "https://console.cloud.google.com/"
-          echo "APIs & Services → Credentials → OAuth 2.0 Client"
-          echo "================================="
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          tag_name: v1.0.${{ github.run_number }}
+          release_name: Release v1.0.${{ github.run_number }}
+          body: |
+            APK hasil build otomatis.
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_name: app-release.apk
+          asset_content_type: application/vnd.android.package-archive

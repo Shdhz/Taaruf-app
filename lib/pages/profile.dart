@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:taaruf_app/main.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
+import 'package:taaruf_app/widget/user_profile_avatar.dart';
 import '../widget/bottomnav/bottom_nav.dart';
 
 class Profile extends StatefulWidget {
@@ -15,20 +16,63 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final String profileImageUrl = "https://picsum.photos/250?image=9";
-  final String name = "Dhafa Alfareza";
-  final int age = 31;
-  final String gender = "male";
-  final String job = "Programmer";
-
+  String? name;
+  int? age;
+  String? gender;
+  String? job;
   bool isLoggingOut = false;
 
   @override
   void initState() {
     super.initState();
+    fetchUserProfile();
   }
 
-  IconData get genderIcon => gender == "male" ? Icons.male : Icons.female;
+  IconData get genderIcon => gender == "Ikhwan" ? Icons.male : Icons.female;
+  Future<void> fetchUserProfile() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final resp =
+          await supabase
+              .from('profiles')
+              .select(r'''
+            full_name,
+            gender,
+            date_of_birth,
+            biodata (
+              age,
+              occupation_category,
+              occupation_detail
+            ),
+            assets (
+              file_url,
+              asset_type,
+              is_primary
+            )
+          ''')
+              .eq('id', user.id)
+              .maybeSingle();
+
+      if (resp != null) {
+        final biodata = resp['biodata'] as Map<String, dynamic>? ?? {};
+        setState(() {
+          name = resp['full_name'] as String?;
+          gender = resp['gender'] as String?;
+          age = biodata['age'] as int?;
+          job = (biodata['occupation_category'] as String?)
+              ?.replaceAllMapped(RegExp(r'(?<=[a-z])(?=[A-Z])'), (m) => ' ')
+              .replaceAllMapped(
+                RegExp(r'(?<=[A-Z])(?=[A-Z][a-z])'),
+                (m) => ' ',
+              );
+        });
+      }
+    } catch (_) {
+      // Tangani jika perlu, kirim ke log/monitoring tools
+    }
+  }
 
   Future<void> _logout() async {
     try {
@@ -144,13 +188,18 @@ class _ProfileState extends State<Profile> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 70,
-              backgroundImage: NetworkImage(profileImageUrl),
+            UserProfileAvatar(
+              size: 130,
+              onTap: () {
+                Get.toNamed(
+                  AppRoutes.detailProfile,
+                  arguments: {'photoUrl': null},
+                );
+              },
             ),
             const SizedBox(height: 10),
             Text(
-              name,
+              name ?? '',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,

@@ -5,11 +5,7 @@ class UserProfileAvatar extends StatefulWidget {
   final double size;
   final VoidCallback? onTap;
 
-  const UserProfileAvatar({
-    super.key,
-    this.size = 70,
-    this.onTap,
-  });
+  const UserProfileAvatar({super.key, this.size = 70, this.onTap});
 
   @override
   State<UserProfileAvatar> createState() => _UserProfileAvatarState();
@@ -35,8 +31,10 @@ class _UserProfileAvatarState extends State<UserProfileAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    final defaultImage =
-        'https://via.placeholder.com/150'; // fallback jika tidak ada gambar
+    final imageProvider  =
+        (imageUrl != null)
+            ? NetworkImage(imageUrl!)
+            : const AssetImage('images/default_picture.jpg') as ImageProvider;
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -47,13 +45,16 @@ class _UserProfileAvatarState extends State<UserProfileAvatar> {
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
             image: DecorationImage(
-              image: NetworkImage(imageUrl ?? defaultImage),
+              image: imageProvider,
               fit: BoxFit.cover,
             ),
           ),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-              : null,
+          child:
+              isLoading
+                  ? const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : null,
         ),
       ),
     );
