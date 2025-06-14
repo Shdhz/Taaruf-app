@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taaruf_app/main.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
+import 'package:taaruf_app/widget/user_profile_avatar.dart';
 // import 'package:icons_plus/icons_plus.dart';
 
 import '../theme/app_text_style.dart';
@@ -16,7 +17,7 @@ class Beranda extends StatefulWidget {
 
 class _BerandaState extends State<Beranda> {
   // DATA CONFIGURATION - Ubah data di sini
-  late String profileImagePath;
+  String? profileImagePath;
   String? userName;
   String? userEmail;
   final String membershipType = "Gold Member";
@@ -59,6 +60,25 @@ class _BerandaState extends State<Beranda> {
     },
   ];
   final String settingsClickMessage = "Pengaturan berhasil kamu klik";
+  String? getPublicImageUrl(String storagePath) {
+    try {
+      if (storagePath.isEmpty) {
+        return null;
+      }
+
+      final publicUrl = supabase.storage
+          .from('user-assets')
+          .getPublicUrl(storagePath);
+
+      if (publicUrl.isEmpty || !publicUrl.startsWith('http')) {
+        return null;
+      }
+
+      return publicUrl;
+    } catch (e) {
+      return null;
+    }
+  }
   // END DATA CONFIGURATION
 
   int selectedIndex = 0;
@@ -107,22 +127,21 @@ class _BerandaState extends State<Beranda> {
     }
   }
 
-  @override
-  void initState(){
-    super.initState();
-    getCurrentUser();
-  }
-
-  void getCurrentUser(){
+  void getCurrentUser() async {
     final user = supabase.auth.currentUser;
 
-    if (user != null){
-      setState((){
-        profileImagePath = user.userMetadata?['avatar_url'] ?? 'images/default.jpg';
-        userEmail = user.email;
-        userName = user.userMetadata?['name'] ?? ['pengguna'];
-      });
+    if (user != null) {
+      userEmail = user.email;
+      userName = user.userMetadata?['name'] ?? 'Pengguna';
+    } else {
+      return;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
   }
 
   @override
@@ -172,25 +191,30 @@ class _BerandaState extends State<Beranda> {
                 ),
                 child: Row(
                   children: [
-                    buildClickableOvalImage(
-                      imagePath: profileImagePath,
-                      onTap: () {
-                        Get.toNamed(AppRoutes.detailProfile, arguments: {
-                          'photoUrl' : profileImagePath
-                        });
-                      },
+                    UserProfileAvatar(
                       size: 80,
-                      margin: const EdgeInsets.all(10),
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.detailProfile,
+                          arguments: {
+                            'photoUrl': null,
+                          }, // atau isi kalau sudah tahu URL-nya
+                        );
+                      },
                     ),
+
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(userName?? 'Loading...', style: AppTextStyle.h3),
+                          Text(
+                            userName ?? 'Loading...',
+                            style: AppTextStyle.h3,
+                          ),
                           const SizedBox(height: 4),
                           Text(
-                            userEmail??'-',
+                            userEmail ?? '-',
                             style: AppTextStyle.bodyMedium.copyWith(
                               color: Colors.grey.shade600,
                             ),

@@ -1,13 +1,15 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:taaruf_app/main.dart';
+
+import '../../services/image_picker_service.dart';
+import '../../widget/loading.dart';
 
 class DetailProfile extends StatefulWidget {
   const DetailProfile({super.key});
@@ -60,10 +62,14 @@ class _DetailProfileState extends State<DetailProfile> {
                     bool granted = await requestPermissions(ImageSource.camera);
                     if (!granted) {
                       Navigator.pop(context);
+                      _showPermissionDialog();
                       return;
                     }
                     final image = await picker.pickImage(
                       source: ImageSource.camera,
+                      maxWidth: 1024,
+                      maxHeight: 1024,
+                      imageQuality: 85,
                     );
                     Navigator.pop(context, image);
                   },
@@ -77,10 +83,14 @@ class _DetailProfileState extends State<DetailProfile> {
                     );
                     if (!granted) {
                       Navigator.pop(context);
+                      _showPermissionDialog();
                       return;
                     }
                     final image = await picker.pickImage(
                       source: ImageSource.gallery,
+                      maxWidth: 1024,
+                      maxHeight: 1024,
+                      imageQuality: 85,
                     );
                     Navigator.pop(context, image);
                   },
@@ -94,42 +104,197 @@ class _DetailProfileState extends State<DetailProfile> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+
+      // Auto upload setelah pick image
+      await _uploadProfilePicture();
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchProfile();
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Izin Diperlukan'),
+            content: const Text(
+              'Aplikasi memerlukan izin kamera/galeri untuk mengambil foto. '
+              'Silakan berikan izin melalui pengaturan aplikasi.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Tutup'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  openAppSettings();
+                },
+                child: const Text('Pengaturan'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Future<void> _uploadProfilePicture() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) {
+      _showErrorSnackBar('User tidak ditemukan');
+      return;
+    }
+
+    if (_imageFile == null) {
+      _showErrorSnackBar('File gambar tidak ditemukan');
+      return;
+    }
+
+    LoadingOverlay.show(context, message: 'Mengupload foto profil...');
+
+    try {
+      final imageUploadService = ImageUploadService();
+
+      // Ambil semua asset lama
+      final oldAssets = await supabase
+          .from('assets')
+          .select('id, file_url')
+          .eq('user_id', userId)
+          .eq('asset_type', 'profile_photo');
+
+      // Hapus gambar lama dari storage dan database
+      for (final asset in oldAssets) {
+        final fileUrl = asset['file_url'] as String;
+        final uri = Uri.parse(fileUrl);
+        final storagePath = uri.pathSegments.skip(3).join('/');
+
+        await supabase.storage.from('user-assets').remove([storagePath]);
+        await supabase.from('assets').delete().eq('id', asset['id']);
+      }
+
+      // Upload gambar baru
+      final assetId = await imageUploadService.uploadProfilePicture(
+        imageFile: _imageFile!,
+        userId: userId,
+        isPrimary: true,
+      );
+
+      if (assetId != null) {
+        await fetchProfile();
+        setState(() => _imageFile = null);
+        _showSuccessSnackBar('Foto profil berhasil diupload!');
+      } else {
+        _showErrorSnackBar('Gagal mengupload foto profil');
+      }
+    } catch (_) {
+      _showErrorSnackBar('Terjadi kesalahan saat mengupload foto profil.');
+    } finally {
+      try {
+        LoadingOverlay.hide();
+      } catch (_) {
+        // silently fail; don't log di production
+      }
+    }
   }
 
   Future<void> fetchProfile() async {
     final userId = supabase.auth.currentUser?.id;
 
     if (userId == null) {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       return;
     }
 
-    final response =
-        await supabase
-            .from('profiles')
-            .select('''
+    try {
+      final response =
+          await supabase
+              .from('profiles')
+              .select('''
           full_name, date_of_birth, gender,
-          biodata(height, weight, education_level, occupation_category, occupation_detail, province, city, about_me, marital_status, wali_name, wali_contact,age),
+          biodata(height, weight, education_level, occupation_category, occupation_detail, province, city, about_me, marital_status, wali_name, wali_contact, age),
           nasab_profile(tribe, origin_province, origin_city, family_background, father_name, father_occupation, mother_name, mother_occupation, siblings_count, child_position),
-          assets(file_url, is_primary)
+          assets(id, file_url, is_primary, asset_type)
         ''')
-            .eq('id', userId)
-            .maybeSingle();
+              .eq('id', userId)
+              .maybeSingle();
 
-    setState(() {
-      profileData = response ?? {};
-      debugPrint('👉 profileData: ${profileData.toString()}');
-      isLoading = false;
-    });
+      final data = response ?? {};
+      final assets = data['assets'] as List<dynamic>?;
+
+      final profileAsset = assets?.firstWhere(
+        (a) => a['is_primary'] == true && a['asset_type'] == 'profile_photo',
+        orElse: () => null,
+      );
+
+      if (profileAsset != null && profileAsset['file_url'] != null) {
+        final signedUrl = await _getSignedImageUrl(profileAsset['file_url']);
+        profileAsset['signed_url'] = signedUrl;
+      }
+
+      setState(() {
+        profileData = data;
+        debugPrint('👉 profileData updated: $profileData');
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      _showErrorSnackBar('Gagal memuat data profil');
+    }
+  }
+
+  Future<String?> getSignedImageUrlFromPublicUrl(String fileUrl) async {
+    try {
+      final uri = Uri.parse(fileUrl);
+
+      // Temukan index 'user-assets', lalu ambil path setelah itu
+      final index = uri.pathSegments.indexOf('user-assets');
+      if (index == -1 || index + 1 >= uri.pathSegments.length) {
+        return null; // Invalid path
+      }
+
+      final storagePath = uri.pathSegments.sublist(index + 1).join('/');
+
+      final signedUrl = await supabase.storage
+          .from('user-assets')
+          .createSignedUrl(storagePath, 60 * 60); // 1 jam
+
+      return signedUrl;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _getSignedImageUrl(String storagePath) async {
+    try {
+      final response = await supabase.storage
+          .from('user-assets')
+          .createSignedUrl(storagePath, 60 * 60);
+
+      return response;
+    } catch (_) {
+      return null;
+    }
   }
 
   void _showEditProfileModal() {
@@ -148,15 +313,24 @@ class _DetailProfileState extends State<DetailProfile> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    fetchProfile();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     final biodata = profileData?['biodata'] ?? {};
     final nasab = profileData?['nasab_profile'] ?? {};
+
+    // Get primary profile photo
     final photoUrl =
         (profileData?['assets'] as List?)?.firstWhere(
-          (a) => a['is_primary'] == true,
+          (a) => a['is_primary'] == true && a['asset_type'] == 'profile_photo',
           orElse: () => null,
         )?['file_url'];
 
@@ -214,20 +388,49 @@ class _DetailProfileState extends State<DetailProfile> {
                 children: [
                   // Background Image
                   Container(
+                    height: 200, // opsional, sesuaikan kebutuhan
+                    width: double.infinity,
                     decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image:
-                            _imageFile != null
-                                ? FileImage(_imageFile!)
-                                : photoUrl != null
-                                ? NetworkImage(photoUrl)
-                                : const AssetImage('images/default_picture.jpg')
-                                    as ImageProvider,
-
-                        fit: BoxFit.cover,
-                      ),
+                      image:
+                          _imageFile != null || photoUrl != null
+                              ? DecorationImage(
+                                image:
+                                    _imageFile != null
+                                        ? FileImage(_imageFile!)
+                                        : NetworkImage(photoUrl!)
+                                            as ImageProvider,
+                                fit: BoxFit.cover,
+                              )
+                              : null,
                     ),
+                    child:
+                        _imageFile == null && photoUrl == null
+                            ? Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person,
+                                      size: 80,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Tap untuk tambah foto',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            : null,
                   ),
+
                   // Gradient overlay
                   Container(
                     decoration: BoxDecoration(
@@ -724,7 +927,6 @@ class _EditProfileModalState extends State<EditProfileModal> {
         _genders = (responses[4] as List<dynamic>).cast<String>();
         _tribes = (responses[5] as List<dynamic>).cast<String>();
       });
-
     } catch (e) {
       // Fallback values based on your database enums
       setState(() {
