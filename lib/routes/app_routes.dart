@@ -13,4 +13,5 @@ abstract class AppRoutes {
 
   // Route Detail user
   static const String detailProfile = '/detail-profile';
+  static const String detailProfileCalon = '/detail-profile-calon';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:taaruf_app/main.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
 import 'package:taaruf_app/widget/user_profile_avatar.dart';
@@ -128,13 +129,26 @@ class _BerandaState extends State<Beranda> {
   }
 
   void getCurrentUser() async {
-    final user = supabase.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
     if (user != null) {
-      userEmail = user.email;
-      userName = user.userMetadata?['name'] ?? 'Pengguna';
-    } else {
-      return;
+      final userId = user.id;
+      final response =
+          await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', userId)
+              .single();
+
+      final fullName = response['full_name'] ?? 'Pengguna';
+      final firstName = fullName.toString().split(" ").first;
+
+      if (mounted) {
+        setState(() {
+          userEmail = user.email;
+          userName = firstName;
+        });
+      }
     }
   }
 
@@ -211,7 +225,11 @@ class _BerandaState extends State<Beranda> {
                           Text(
                             userName ?? 'Loading...',
                             style: AppTextStyle.h3,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
                           ),
+
                           const SizedBox(height: 4),
                           Text(
                             userEmail ?? '-',

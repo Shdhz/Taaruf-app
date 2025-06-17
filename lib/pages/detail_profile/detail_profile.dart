@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:taaruf_app/main.dart';
@@ -483,145 +484,134 @@ class _DetailProfileState extends State<DetailProfile> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Biodata Section
-                    _buildModernSection("Biodata Pribadi", Icons.person, [
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Biodata Section
+                  _buildModernSection("Biodata Pribadi", Icons.person, [
+                    _buildModernInfoCard(
+                      "Tinggi & Berat",
+                      "${biodata['height'] ?? '-'} cm • ${biodata['weight'] ?? '-'} kg",
+                      Icons.height,
+                    ),
+                    _buildModernInfoCard(
+                      "Pendidikan terakhir",
+                      biodata['education_level'] ?? 'Belum diisi',
+                      Icons.school,
+                    ),
+                    _buildModernInfoCard(
+                      "Jenis Pekerjaan",
+                      biodata['occupation_category'] ?? 'Belum diisi',
+                      Icons.work,
+                    ),
+                    _buildModernInfoCard(
+                      "detail Pekerjaan",
+                      biodata['occupation_detail'] ?? 'Belum diisi',
+                      Icons.work_outline,
+                    ),
+                    _buildModernInfoCard(
+                      "Status Pernikahan",
+                      biodata['marital_status'] ?? 'Belum diisi',
+                      Icons.favorite,
+                    ),
+                    _buildModernInfoCard(
+                      "Provinsi",
+                      biodata['province'] ?? 'Belum diisi',
+                      Icons.map,
+                    ),
+                    _buildModernInfoCard(
+                      "Kota",
+                      biodata['city'] ?? 'Belum diisi',
+                      Icons.location_city,
+                    ),
+                  ]),
+
+                  const SizedBox(height: 24),
+
+                  // Wali Section - SELALU TAMPIL UNTUK DEBUG
+                  _buildModernSection(
+                    "Informasi Wali",
+                    Icons.supervisor_account,
+                    [
                       _buildModernInfoCard(
-                        "Tinggi & Berat",
-                        "${biodata['height'] ?? '-'} cm • ${biodata['weight'] ?? '-'} kg",
-                        Icons.height,
+                        "Nama Wali",
+                        biodata['wali_name']?.toString() ?? 'Belum diisi',
+                        Icons.person_outline,
                       ),
                       _buildModernInfoCard(
-                        "Pendidikan terakhir",
-                        biodata['education_level'] ?? 'Belum diisi',
-                        Icons.school,
+                        "Kontak Wali",
+                        biodata['wali_contact']?.toString() ?? 'Belum diisi',
+                        Icons.phone,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  _buildModernSection("Tentang Saya", Icons.info_outline, [
+                    _buildAboutSection("Tentang Saya", biodata['about_me']),
+                  ]),
+
+                  const SizedBox(height: 24),
+
+                  // Nasab Section
+                  _buildModernSection(
+                    "Informasi Keluarga & Nasab",
+                    Icons.family_restroom,
+                    [
+                      _buildModernInfoCard(
+                        "Suku",
+                        nasab['tribe'] ?? 'Belum diisi',
+                        Icons.groups,
                       ),
                       _buildModernInfoCard(
-                        "Jenis Pekerjaan",
-                        biodata['occupation_category'] ?? 'Belum diisi',
+                        "Asal Daerah",
+                        "${nasab['origin_city'] ?? '-'}, ${nasab['origin_province'] ?? '-'}",
+                        Icons.place,
+                      ),
+                      _buildModernInfoCard(
+                        "Posisi Keluarga",
+                        "Anak ke-${nasab['child_position'] ?? '-'} dari ${nasab['siblings_count'] ?? '-'} bersaudara",
+                        Icons.people,
+                      ),
+                      // TAMBAHAN UNTUK DEBUG - SELALU TAMPIL
+                      _buildModernInfoCard(
+                        "Nama Ayah",
+                        nasab['father_name']?.toString() ?? 'Belum diisi',
+                        Icons.man,
+                      ),
+                      _buildModernInfoCard(
+                        "Pekerjaan Ayah",
+                        nasab['father_occupation']?.toString() ?? 'Belum diisi',
                         Icons.work,
                       ),
                       _buildModernInfoCard(
-                        "detail Pekerjaan",
-                        biodata['occupation_detail'] ?? 'Belum diisi',
+                        "Nama Ibu",
+                        nasab['mother_name']?.toString() ?? 'Belum diisi',
+                        Icons.woman,
+                      ),
+                      _buildModernInfoCard(
+                        "Pekerjaan Ibu",
+                        nasab['mother_occupation']?.toString() ?? 'Belum diisi',
                         Icons.work_outline,
                       ),
-                      _buildModernInfoCard(
-                        "Status Pernikahan",
-                        biodata['marital_status'] ?? 'Belum diisi',
-                        Icons.favorite,
-                      ),
-                      _buildModernInfoCard(
-                        "Provinsi",
-                        biodata['province'] ?? 'Belum diisi',
-                        Icons.map,
-                      ),
-                      _buildModernInfoCard(
-                        "Kota",
-                        biodata['city'] ?? 'Belum diisi',
-                        Icons.location_city,
-                      ),
-                    ]),
+                    ],
+                  ),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // Wali Section - SELALU TAMPIL UNTUK DEBUG
-                    _buildModernSection(
-                      "Informasi Wali",
-                      Icons.supervisor_account,
-                      [
-                        _buildModernInfoCard(
-                          "Nama Wali",
-                          biodata['wali_name']?.toString() ?? 'Belum diisi',
-                          Icons.person_outline,
-                        ),
-                        _buildModernInfoCard(
-                          "Kontak Wali",
-                          biodata['wali_contact']?.toString() ?? 'Belum diisi',
-                          Icons.phone,
-                        ),
-                      ],
-                    ),
+                  _buildModernSection("Latar belakang keluarga", Icons.info_outline, [
+                    _buildAboutSection("Latar belakang keluarga", nasab['family_background']),
+                  ]),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // About Me Section - SELALU TAMPIL UNTUK DEBUG
-                    _buildAboutSection(
-                      "Tentang Saya",
-                      biodata['about_me']?.toString() ?? 'Belum diisi',
-                      Icons.info_outline,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Nasab Section
-                    _buildModernSection(
-                      "Informasi Keluarga & Nasab",
-                      Icons.family_restroom,
-                      [
-                        _buildModernInfoCard(
-                          "Suku",
-                          nasab['tribe'] ?? 'Belum diisi',
-                          Icons.groups,
-                        ),
-                        _buildModernInfoCard(
-                          "Asal Daerah",
-                          "${nasab['origin_city'] ?? '-'}, ${nasab['origin_province'] ?? '-'}",
-                          Icons.place,
-                        ),
-                        _buildModernInfoCard(
-                          "Posisi Keluarga",
-                          "Anak ke-${nasab['child_position'] ?? '-'} dari ${nasab['siblings_count'] ?? '-'} bersaudara",
-                          Icons.people,
-                        ),
-                        // TAMBAHAN UNTUK DEBUG - SELALU TAMPIL
-                        _buildModernInfoCard(
-                          "Nama Ayah",
-                          nasab['father_name']?.toString() ?? 'Belum diisi',
-                          Icons.man,
-                        ),
-                        _buildModernInfoCard(
-                          "Pekerjaan Ayah",
-                          nasab['father_occupation']?.toString() ??
-                              'Belum diisi',
-                          Icons.work,
-                        ),
-                        _buildModernInfoCard(
-                          "Nama Ibu",
-                          nasab['mother_name']?.toString() ?? 'Belum diisi',
-                          Icons.woman,
-                        ),
-                        _buildModernInfoCard(
-                          "Pekerjaan Ibu",
-                          nasab['mother_occupation']?.toString() ??
-                              'Belum diisi',
-                          Icons.work_outline,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Family Background Section - SELALU TAMPIL UNTUK DEBUG
-                    _buildAboutSection(
-                      "Latar Belakang Keluarga",
-                      nasab['family_background']?.toString() ?? 'Belum diisi',
-                      Icons.home,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
           ),
@@ -635,55 +625,93 @@ class _DetailProfileState extends State<DetailProfile> {
     IconData icon,
     List<Widget> children,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A90E2).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header (Terpusat & dibatasi lebar)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
-              child: Icon(icon, color: const Color(0xFF4A90E2), size: 20),
             ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(icon, color: Colors.deepPurple, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...children,
-      ],
+          ),
+
+          // Section Content (Juga dibatasi maxWidth dan terpusat)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildModernInfoCard(String title, String value, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: Colors.grey[600], size: 18),
-          ),
+          Icon(icon, size: 18, color: Colors.deepPurple[300]),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -691,8 +719,8 @@ class _DetailProfileState extends State<DetailProfile> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[600],
                   ),
@@ -700,10 +728,10 @@ class _DetailProfileState extends State<DetailProfile> {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black87,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[800],
                   ),
                 ),
               ],
@@ -714,54 +742,40 @@ class _DetailProfileState extends State<DetailProfile> {
     );
   }
 
-  Widget _buildAboutSection(String title, String content, [IconData? icon]) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+  Widget _buildAboutSection(String title, String content) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF4A90E2).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Icon(
-                icon ?? Icons.info_outline,
-                color: const Color(0xFF4A90E2),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              child: Text(
+                content,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: Colors.grey[800],
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Text(
-            content,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.5,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

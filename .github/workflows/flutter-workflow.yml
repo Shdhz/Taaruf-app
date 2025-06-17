@@ -13,11 +13,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
-      - name: Create .env from GitHub Secret
-        run: |
-          echo "${{ secrets.ENV }}" | tr -d '\r' > .env
-
 
       - name: Setup Java
         uses: actions/setup-java@v4

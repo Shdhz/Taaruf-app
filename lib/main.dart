@@ -7,6 +7,9 @@ import 'package:taaruf_app/routes/app_routes.dart';
 import 'package:taaruf_app/theme/app_theme.dart';
 import 'package:taaruf_app/widget/bottomnav/BottomNavController.dart';
 
+late String initialRoute;
+final supabase = Supabase.instance.client;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -20,6 +23,14 @@ Future<void> main() async {
     }
 
     await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+    // Cek session login
+    final session = supabase.auth.currentSession;
+    if(session != null){
+      initialRoute = AppRoutes.beranda;
+    }else{
+      initialRoute = AppRoutes.home;
+    }
   } catch (e) {
     rethrow;
   }
@@ -27,7 +38,7 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-final supabase = Supabase.instance.client;
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,7 +48,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Taaruf App',
-      initialRoute: AppRoutes.home, // Root for route
+      initialRoute: initialRoute, // Root for route
       getPages: AppPages.pages,
       theme: AppTheme.lightTheme, // Apply the light theme with Poppins
       // themeMode: ThemeMode.system,

@@ -4,7 +4,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:taaruf_app/main.dart';
+import 'package:taaruf_app/routes/app_routes.dart';
 
 class CardCalonTaaruf {
   final String name;
@@ -12,14 +15,39 @@ class CardCalonTaaruf {
   final String imageUrl;
   final double distance;
   final bool isVerified;
+  final Map<String, dynamic> biodata;
+  final Map<String, dynamic> nasab;
+  final List<Map<String, dynamic>> userQuestions;
 
   const CardCalonTaaruf({
     required this.name,
     required this.age,
     required this.imageUrl,
     required this.distance,
-    this.isVerified = false,
+    required this.isVerified,
+    required this.biodata,
+    required this.nasab,
+    required this.userQuestions,
   });
+
+  factory CardCalonTaaruf.fromMap(
+    Map<String, dynamic> profile,
+    Map<String, dynamic> biodata,
+    Map<String, dynamic> nasab,
+    List<Map<String, dynamic>> userQuestions,
+    String imageUrl,
+  ) {
+    return CardCalonTaaruf(
+      name: profile['full_name'] ?? 'Tanpa Nama',
+      age: biodata['age'] ?? 0,
+      imageUrl: imageUrl,
+      distance: 0.0,
+      isVerified: profile['profile_completed'] ?? false,
+      biodata: biodata,
+      nasab: nasab,
+      userQuestions: userQuestions,
+    );
+  }
 }
 
 class CalonTaarufWidget extends StatefulWidget {
@@ -39,52 +67,136 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
   static const double cacheExtent = 2000.0;
   static const EdgeInsets containerPadding = EdgeInsets.all(16.0);
   static const Duration snackBarDuration = Duration(seconds: 1);
-  static const String cardClickMessage = 'Clicked on';
   static const String loveClickMessage = 'Love icon clicked!';
   static const String imageNotFoundText = 'Image not found';
 
-  // Data dummy - Bisa diganti dengan data dari database
-  static const List<CardCalonTaaruf> _dummyUsers = [
-    CardCalonTaaruf(
-      name: "Tini",
-      age: 33,
-      imageUrl: "images/cewek_cakep.jpg",
-      distance: 1.0,
-      isVerified: true,
-    ),
-    CardCalonTaaruf(
-      name: "Sari",
-      age: 28,
-      imageUrl: "images/cewek_cakep.jpg",
-      distance: 2.5,
-      isVerified: false,
-    ),
-    CardCalonTaaruf(
-      name: "Maya",
-      age: 30,
-      imageUrl: "images/cewek_cakep.jpg",
-      distance: 0.8,
-      isVerified: true,
-    ),
-    CardCalonTaaruf(
-      name: "Dewi",
-      age: 25,
-      imageUrl: "images/cewek_cakep.jpg",
-      distance: 3.2,
-      isVerified: false,
-    ),
-    // Tambah lebih banyak data untuk testing performa
-    CardCalonTaaruf(
-      name: "Rina",
-      age: 29,
-      imageUrl: "images/cewek_cakep.jpg",
-      distance: 1.8,
-      isVerified: true,
-    ),
-  ];
-  // END DATA CONFIGURATION
+  List<CardCalonTaaruf> _users = [];
+  bool _isLoading = true;
 
   late final ScrollController _scrollController;
+
+  // Bug relasi foto pada user tidak bisa ditampilkan
+  Future<void> _fetchUsers() async {
+    final client = supabase;
+    final currentUser = client.auth.currentUser;
+
+    if (currentUser == null) return;
+
+    try {
+      // Ambil gender dari user yang sedang login
+      final profileRes =
+          await client
+              .from('profiles')
+              .select('gender')
+              .eq('id', currentUser.id)
+              .single();
+
+      final myGender = profileRes['gender'];
+      final targetGender = myGender == 'Ikhwan' ? 'Akhwat' : 'Ikhwan';
+
+      // Ambil semua profile dari target gender yang aktif
+      final profilesResult = await client
+          .from('profiles')
+          .select(
+            'id, full_name, profile_completed, biodata(*), nasab_profile(tribe, origin_province, origin_city, father_name, mother_name, siblings_count, child_position),  user_questions(custom_question_text, question_order)',
+          )
+          .eq('gender', targetGender)
+          .eq('is_active', true);
+
+      // Ambil list ID dari profile
+      final profileIds =
+          profilesResult
+              .map((p) => p['id'].toString().trim())
+              .where((id) => id.isNotEmpty)
+              .toList();
+
+      debugPrint('[INFO] Jumlah profile ditemukan: ${profileIds.length}');
+      debugPrint('[INFO] Profile IDs: $profileIds');
+
+      // Ambil semua assets yang terkait dengan profileIds
+      final assetResponse = await client
+          .from('assets')
+          .select('user_id, asset_type, file_url')
+          .inFilter('user_id', profileIds);
+
+      debugPrint('[INFO] Asset total: ${assetResponse.length}');
+
+      // Filter hanya asset dengan tipe "profile_photo"
+      final filteredAssets =
+          assetResponse
+              .where((a) => a['asset_type'].toString() == 'profile_photo')
+              .toList();
+
+      // Buat mapping user_id -> file_url
+      final Map<String, String> assetMap = {};
+      for (final row in filteredAssets) {
+        final uid = row['user_id'].toString().trim();
+        final url = row['file_url'].toString().trim();
+        assetMap[uid] = url;
+      }
+
+      // Debug jika ada profile yang tidak punya foto
+      for (final id in profileIds) {
+        if (!assetMap.containsKey(id)) {
+          debugPrint('[WARNING] No asset found for profile id: $id');
+        }
+      }
+
+      // Siapkan list user
+      final List<CardCalonTaaruf> fetchedUsers = [];
+
+      for (final profileMap in profilesResult) {
+        final id = profileMap['id'].toString().trim();
+        final rawUrl = assetMap[id] ?? '';
+        final fullName = profileMap['full_name'] ?? 'Tanpa Nama';
+        final isVerified = profileMap['profile_completed'] ?? false;
+        final biodata = Map<String, dynamic>.from(profileMap['biodata'] ?? {});
+        final nasab = Map<String, dynamic>.from(
+          profileMap['nasab_profile'] ?? {},
+        );
+        final questions = List<Map<String, dynamic>>.from(
+          profileMap['user_questions'] ?? [],
+        );
+
+        final age = biodata['age'] ?? 0;
+
+        // Susun full URL jika file_url tidak diawali http
+        final imageUrl =
+            rawUrl.isNotEmpty
+                ? (rawUrl.startsWith('http')
+                    ? rawUrl
+                    : 'https://uhergrjlsgpanrqlupvx.supabase.co$rawUrl')
+                : '';
+
+        fetchedUsers.add(
+          CardCalonTaaruf(
+            name: fullName,
+            age: age,
+            imageUrl: imageUrl,
+            distance: 0.0,
+            isVerified: isVerified,
+            biodata: biodata,
+            nasab: nasab,
+            userQuestions: questions,
+          ),
+        );
+      }
+
+      // Set state
+      if (mounted) {
+        setState(() {
+          _users = fetchedUsers;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -92,6 +204,7 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
   @override
   void initState() {
     super.initState();
+    _fetchUsers();
     _scrollController = ScrollController();
   }
 
@@ -107,49 +220,39 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
 
     return Padding(
       padding: containerPadding,
-      child: GridView.builder(
-        controller: _scrollController,
-        // Performance optimizations
-        cacheExtent: cacheExtent,
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-
-        // Grid configuration
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: crossAxisSpacing,
-          mainAxisSpacing: mainAxisSpacing,
-          childAspectRatio: childAspectRatio,
-        ),
-
-        // Performance settings
-        itemCount: _dummyUsers.length,
-        addAutomaticKeepAlives: false,
-        addRepaintBoundaries: true,
-        addSemanticIndexes: false,
-
-        itemBuilder: (context, index) {
-          // Lazy loading optimization
-          return _UserCard(
-            user: _dummyUsers[index],
-            key: ValueKey('${_dummyUsers[index].name}_$index'),
-            onTap: () => _handleCardTap(_dummyUsers[index]),
-            onLoveTap: () => _handleLoveTap(_dummyUsers[index]),
-          );
-        },
-      ),
+      child:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : GridView.builder(
+                controller: _scrollController,
+                cacheExtent: cacheExtent,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: crossAxisSpacing,
+                  mainAxisSpacing: mainAxisSpacing,
+                  childAspectRatio: childAspectRatio,
+                ),
+                itemCount: _users.length,
+                itemBuilder: (context, index) {
+                  return _UserCard(
+                    user: _users[index],
+                    key: ValueKey('${_users[index].name}_$index'),
+                    onTap: () => _handleCardTap(_users[index]),
+                    onLoveTap: () => _handleLoveTap(_users[index]),
+                  );
+                },
+              ),
     );
   }
 
   void _handleCardTap(CardCalonTaaruf user) {
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$cardClickMessage ${user.name}'),
-        duration: snackBarDuration,
-      ),
-    );
+
+    // Navigasi ke halaman detail lewat named route
+    Get.toNamed(AppRoutes.detailProfileCalon, arguments: user);
   }
 
   void _handleLoveTap(CardCalonTaaruf user) {
@@ -209,7 +312,7 @@ class _UserCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              _buildOptimizedImage(),
+              _buildOptimizedImage(user.imageUrl),
               _buildGradientOverlay(),
               _buildContentOverlay(context),
             ],
@@ -219,14 +322,11 @@ class _UserCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOptimizedImage() {
+  Widget _buildOptimizedImage(String imageUrl) {
     return ImageFiltered(
-      imageFilter: ImageFilter.blur(
-        sigmaX: 5.0,
-        sigmaY: 5.0,
-      ), // Adjust blur intensity
-      child: Image.asset(
-        user.imageUrl,
+      imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+      child: Image.network(
+        imageUrl,
         fit: BoxFit.cover,
         gaplessPlayback: true,
         // Memory optimization

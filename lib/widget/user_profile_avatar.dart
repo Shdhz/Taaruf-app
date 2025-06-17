@@ -23,6 +23,9 @@ class _UserProfileAvatarState extends State<UserProfileAvatar> {
 
   Future<void> _loadProfileImage() async {
     final url = await UserProfileService.fetchProfileImageUrl();
+
+    if (!mounted) return; // Tambahkan ini
+
     setState(() {
       imageUrl = url;
       isLoading = false;
@@ -31,7 +34,7 @@ class _UserProfileAvatarState extends State<UserProfileAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    final imageProvider  =
+    final imageProvider =
         (imageUrl != null)
             ? NetworkImage(imageUrl!)
             : const AssetImage('images/default_picture.jpg') as ImageProvider;
@@ -44,10 +47,7 @@ class _UserProfileAvatarState extends State<UserProfileAvatar> {
           height: widget.size,
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
-            ),
+            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
           ),
           child:
               isLoading
