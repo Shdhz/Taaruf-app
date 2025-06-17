@@ -691,7 +691,7 @@ class _DetailProfileCalonState extends State<DetailProfileCalon> {
 }
 
 Widget _buildFormAjukanPertanyaan(BuildContext context) {
-  final TextEditingController _questionController = TextEditingController();
+  final TextEditingController questionController = TextEditingController();
 
   return StatefulBuilder(
     builder: (context, setModalState) {
@@ -713,7 +713,7 @@ Widget _buildFormAjukanPertanyaan(BuildContext context) {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: _questionController,
+                controller: questionController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: "Tulis pertanyaanmu untuk calon...",
