@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taaruf_app/pages/tab_bar_history/pending.dart';
+import 'package:taaruf_app/pages/tab_bar_history/sent.dart';
 
 import '../widget/bottomnav/bottom_nav.dart';
 import '../widget/tabBar/tab_bar_view.dart';
@@ -56,6 +57,7 @@ class _HistoryState extends State<History> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 250, 250, 250),
         title: const Text(
           "History",
           style: TextStyle(color: Colors.deepPurple),
@@ -70,12 +72,7 @@ class _HistoryState extends State<History> with SingleTickerProviderStateMixin {
                 case 'PENDING':
                   return const PendingTab();
                 case 'TERKIRIM':
-                  return EmptyTabContent(
-                    title: "UUPS !",
-                    message: "Belum ada data terkirim.",
-                    image: Icons.outbox,
-                    tabs: [],
-                  );
+                   return const SentTab();
                 case 'DITERIMA':
                   return EmptyTabContent(
                     title: "UUPS !",

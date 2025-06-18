@@ -10,8 +10,10 @@ import 'package:taaruf_app/main.dart';
 import 'package:taaruf_app/routes/app_routes.dart';
 
 class CardCalonTaaruf {
+  final String id;
   final String name;
   final int age;
+  final String? gender;
   final String imageUrl;
   final double distance;
   final bool isVerified;
@@ -20,8 +22,10 @@ class CardCalonTaaruf {
   final List<Map<String, dynamic>> userQuestions;
 
   const CardCalonTaaruf({
+    required this.id,
     required this.name,
     required this.age,
+    required this.gender,
     required this.imageUrl,
     required this.distance,
     required this.isVerified,
@@ -38,6 +42,7 @@ class CardCalonTaaruf {
     String imageUrl,
   ) {
     return CardCalonTaaruf(
+      id: profile['id'],
       name: profile['full_name'] ?? 'Tanpa Nama',
       age: biodata['age'] ?? 0,
       imageUrl: imageUrl,
@@ -46,6 +51,7 @@ class CardCalonTaaruf {
       biodata: biodata,
       nasab: nasab,
       userQuestions: userQuestions,
+      gender: profile['gender'],
     );
   }
 }
@@ -98,7 +104,7 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
       final profilesResult = await client
           .from('profiles')
           .select(
-            'id, full_name, profile_completed, biodata(*), nasab_profile(tribe, origin_province, origin_city, father_name, mother_name, siblings_count, child_position),  user_questions(custom_question_text, question_order)',
+            'id, full_name, gender, profile_completed, biodata(*), nasab_profile(tribe, origin_province, origin_city, father_name, mother_name, siblings_count, child_position),  user_questions(custom_question_text, question_order)',
           )
           .eq('gender', targetGender)
           .eq('is_active', true);
@@ -170,6 +176,7 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
 
         fetchedUsers.add(
           CardCalonTaaruf(
+            id: id,
             name: fullName,
             age: age,
             imageUrl: imageUrl,
@@ -178,6 +185,7 @@ class _CalonTaarufWidgetState extends State<CalonTaarufWidget>
             biodata: biodata,
             nasab: nasab,
             userQuestions: questions,
+            gender: profileMap['gender'] ?? '-',
           ),
         );
       }
