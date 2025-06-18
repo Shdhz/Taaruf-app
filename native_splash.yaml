@@ -1,0 +1,13 @@
+# flutter_native_splash-development.yaml
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  color: "#FFFDF6"
+  image: images/splash_screen_icon.png
+  
+  android_12:
+    image: images/splash_screen_icon.png
+    icon_background_color: "#FFFDF6"
+    image_dark: images/splash_screen_icon.png
+    icon_background_color_dark: "#FFFDF6"
