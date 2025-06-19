@@ -721,7 +721,7 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
   final userQuestionService = UserQuestionService();
 
   List<Map<String, dynamic>> defaultQuestions = [];
-  List<String> selectedQuestionIds = [];
+  List<dynamic> selectedQuestionIds = [];
   String customQuestion = '';
   bool isLoading = false;
   bool isLoadingData = true;
@@ -766,8 +766,6 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
 
   Future<void> _submitTaarufProposal() async {
     if (selectedQuestionIds.isEmpty && customQuestion.trim().isEmpty) {
-      if (!mounted) return;
-      Navigator.pop(context);
       _showSnackBar(
         'Pilih minimal 1 pertanyaan atau tulis pertanyaan custom',
         color: Colors.orange,
@@ -780,72 +778,92 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
 
     try {
       final currentUser = supabase.auth.currentUser;
-      if (currentUser == null) throw Exception('terautentikasi');
+      if (currentUser == null) throw Exception('User tidak terautentikasi');
 
-      // ✅ Cek apakah user sudah pernah kirim ke target yang sama
-      final alreadySentToSameUser =
-          await supabase
-              .from('matches')
-              .select('id')
-              .eq('requester_id', currentUser.id)
-              .eq('requested_id', widget.targetUserId)
-              .eq('status', 'pending')
-              .maybeSingle();
+      /// ✅ Cek apakah sudah pernah kirim ke target ini dalam status pending, maksimal 2x
+      final sentToTarget = await supabase
+          .from('matches')
+          .select('id')
+          .eq('requester_id', currentUser.id)
+          .eq('requested_id', widget.targetUserId)
+          .eq('status', 'pending');
 
-      if (alreadySentToSameUser != null) {
-        if (!mounted) return;
-        Navigator.pop(context);
+      if (sentToTarget.length >= 2) {
         _showSnackBar(
-          'Kamu sudah mengirim CV ke pengguna ini. Tunggu responnya.',
+          'Kamu sudah mengirim lamaran ke pengguna ini maksimal 2 kali. Tunggu responnya.',
           color: Colors.orange,
           icon: Icons.info_outline,
         );
         return;
       }
 
-      // ✅ Siapkan pertanyaan
+      /// ✅ Siapkan pertanyaan
       final List<Map<String, dynamic>> allQuestions = [];
+      int questionOrder = 1;
 
+      // 🔹 Tambahkan pertanyaan default
       for (final questionId in selectedQuestionIds) {
-        allQuestions.add({'question_id': questionId, 'answer_text': ''});
-      }
-
-      if (customQuestion.trim().isNotEmpty) {
-        await userQuestionService.addUserQuestion(
+        final userQuestionId = await userQuestionService.addUserQuestion(
           userId: currentUser.id,
-          customText: customQuestion.trim(),
-          questionOrder: 99,
+          defaultQuestionId: questionId.toString(),
+          questionOrder: questionOrder++,
         );
 
-        final userQuestions = await userQuestionService.getUserQuestions(
-          currentUser.id,
-        );
-
-        final lastCustom = userQuestions.lastWhere(
-          (q) => q['custom_question_text'] == customQuestion.trim(),
-          orElse: () => <String, dynamic>{},
-        );
-
-        if (lastCustom['id'] != null) {
+        if (userQuestionId != null) {
           allQuestions.add({
-            'question_id': lastCustom['id'],
+            'user_question_id': userQuestionId,
             'answer_text': '',
           });
         } else {
-          throw Exception("custom");
+          throw Exception("Gagal menyimpan pertanyaan default");
         }
       }
 
-      // ✅ Kirim proposal
+      // 🔹 Tambahkan pertanyaan custom jika ada
+      if (customQuestion.trim().isNotEmpty) {
+        final customUserQuestionId = await userQuestionService.addUserQuestion(
+          userId: currentUser.id,
+          customText: customQuestion.trim(),
+          questionOrder: questionOrder,
+        );
+
+        if (customUserQuestionId != null) {
+          allQuestions.add({
+            'user_question_id': customUserQuestionId,
+            'answer_text': '',
+          });
+        } else {
+          throw Exception("Gagal menyimpan pertanyaan custom");
+        }
+      }
+
+      /// ✅ Kirim lamaran taaruf
       final result = await userQuestionService.submitTaarufProposal(
         requesterId: currentUser.id,
         requestedId: widget.targetUserId,
         questions: allQuestions,
       );
 
-      if (result != 'OK') throw Exception("submit");
+      if (result == 'PENGAJUAN_SUDAH_ADA') {
+        _showSnackBar(
+          'Target pengguna sudah mengirim lamaran ke kamu. Cek inbox untuk merespons.',
+          color: Colors.orange,
+          icon: Icons.info_outline,
+        );
+        return;
+      }
 
-      if (!mounted) return;
+      if (result == 'MAX_PENGAJUAN') {
+        _showSnackBar(
+          'Kamu hanya bisa mengirim maksimal 2 lamaran yang belum direspon.',
+          color: Colors.orange,
+          icon: Icons.warning_amber_outlined,
+        );
+        return;
+      }
+
+      if (result != 'OK') throw Exception("Gagal mengirim lamaran");
+
       Navigator.pop(context);
       _showSnackBar(
         'Lamaran taaruf berhasil dikirim ke ${widget.targetUserName}',
@@ -853,14 +871,15 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
         icon: Icons.check_circle_outline,
       );
     } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context);
       String errorMessage = 'Gagal mengirim lamaran.';
+
       if (e.toString().contains('terautentikasi')) {
         errorMessage = 'Silakan login terlebih dahulu.';
+      } else if (e.toString().contains('default')) {
+        errorMessage = 'Gagal menyimpan pertanyaan yang dipilih. Coba lagi.';
       } else if (e.toString().contains('custom')) {
         errorMessage = 'Pertanyaan custom gagal disimpan. Coba lagi.';
-      } else if (e.toString().contains('submit')) {
+      } else if (e.toString().contains('lamaran')) {
         errorMessage = 'Terjadi kesalahan saat mengirim lamaran.';
       }
 
