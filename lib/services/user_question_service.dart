@@ -41,7 +41,7 @@ class UserQuestionService {
     required List<Map<String, dynamic>> questions,
   }) async {
     try {
-      // Cek apakah sudah ada pengajuan dari si requested ke requester (dibalik)
+      // 🔍 Cek apakah sudah ada pengajuan dari si requested ke requester
       final existingMatch =
           await supabase
               .from('matches')
@@ -55,7 +55,7 @@ class UserQuestionService {
         return 'PENGAJUAN_SUDAH_ADA';
       }
 
-      // Buat match baru
+      // ✅ Buat match baru
       final matchResponse =
           await supabase
               .from('matches')
@@ -67,10 +67,12 @@ class UserQuestionService {
               .select('id')
               .single();
 
-      final matchId = matchResponse['id'] as String?;
-      if (matchId == null) throw Exception('Gagal membuat match.');
+      final matchId = matchResponse['id'];
+      if (matchId == null || matchId is! String) {
+        throw Exception('submit');
+      }
 
-      // Simpan pertanyaan
+      // 💾 Simpan pertanyaan ke tabel match_answers
       for (final q in questions) {
         await supabase.from('match_answers').insert({
           'match_id': matchId,

@@ -31,39 +31,41 @@ class _SentTabState extends State<SentTab> {
       final response = await supabase
           .from('matches')
           .select(r'''
-                id,
-                status,
-                created_at,
-                requested_id,
-                requested:profiles!matches_requested_id_fkey(
-                  full_name,
-                  id,
-                  assets:assets!user_id(asset_type, file_url, is_primary)
-                )
-          ''')
-          .eq('requester_id', user.id)
+          id,
+          status,
+          created_at,
+          requester_id,
+          requested_id,
+          requester:profiles!matches_requester_id_fkey(
+            id, full_name, 
+            assets:assets!user_id(asset_type, file_url, is_primary)
+          ),
+          requested:profiles!matches_requested_id_fkey(
+            id, full_name, 
+            assets:assets!user_id(asset_type, file_url, is_primary)
+          )
+        ''')
+          .or('requester_id.eq.${user.id},requested_id.eq.${user.id}')
           .order('created_at', ascending: false);
-
-      // ignore: unnecessary_null_comparison
-      if (response == null) throw Exception('Response null');
 
       final List<Map<String, dynamic>> list = List<Map<String, dynamic>>.from(
         response,
       );
-      debugPrint('[DEBUG] sentMatches raw: $list');
 
       setState(() {
         sentMatches =
             list.map((m) {
-              final req = m['requested'] as Map<String, dynamic>? ?? {};
+              final isSender = m['requester_id'] == user.id;
+              final targetUser = isSender ? m['requested'] : m['requester'];
               return {
                 'id': m['id'],
                 'status': m['status'],
                 'created_at': m['created_at'],
-                'requested': {
-                  'id': req['id'],
-                  'full_name': req['full_name'],
-                  'assets': (req['assets'] ?? []) as List<dynamic>,
+                'direction': isSender ? 'sent' : 'received',
+                'target': {
+                  'id': targetUser['id'],
+                  'full_name': targetUser['full_name'],
+                  'assets': (targetUser['assets'] ?? []) as List<dynamic>,
                 },
               };
             }).toList();
@@ -129,7 +131,7 @@ class _SentTabState extends State<SentTab> {
       itemCount: sentMatches.length,
       itemBuilder: (context, index) {
         final match = sentMatches[index];
-        final target = match['requested'];
+        final target = match['target'];
         final photo = (target['assets'] as List).firstWhere(
           (a) => a['is_primary'] == true,
           orElse: () => null,
@@ -157,6 +159,7 @@ class _SentTabState extends State<SentTab> {
               'Dikirim: ${DateTime.parse(match['created_at']).toLocal().toString().substring(0, 10)}',
               style: GoogleFonts.poppins(fontSize: 13),
             ),
+            
             trailing: _buildStatusBadge(match['status']),
           ),
         );

@@ -766,29 +766,12 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
 
   Future<void> _submitTaarufProposal() async {
     if (selectedQuestionIds.isEmpty && customQuestion.trim().isEmpty) {
+      if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: const [
-              Icon(Icons.warning_amber_outlined, color: Colors.white),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Pilih minimal 1 pertanyaan atau tulis pertanyaan custom',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          elevation: 10,
-          duration: Duration(seconds: 4),
-        ),
+      _showSnackBar(
+        'Pilih minimal 1 pertanyaan atau tulis pertanyaan custom',
+        color: Colors.orange,
+        icon: Icons.warning_amber_outlined,
       );
       return;
     }
@@ -797,47 +780,30 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
 
     try {
       final currentUser = supabase.auth.currentUser;
-      if (currentUser == null) throw Exception('User tidak terautentikasi');
+      if (currentUser == null) throw Exception('terautentikasi');
 
-      // 🔍 Cek apakah user sedang kirim CV ke orang lain (pending)
-      final pendingMatch =
+      // ✅ Cek apakah user sudah pernah kirim ke target yang sama
+      final alreadySentToSameUser =
           await supabase
               .from('matches')
               .select('id')
               .eq('requester_id', currentUser.id)
+              .eq('requested_id', widget.targetUserId)
               .eq('status', 'pending')
               .maybeSingle();
 
-      if (pendingMatch != null) {
+      if (alreadySentToSameUser != null) {
         if (!mounted) return;
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: const [
-                Icon(Icons.info_outline, color: Colors.white),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Kamu sudah mengirim CV taaruf ke orang lain. Tunggu respon mereka sebelum mengirim ke calon lain.',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color.fromARGB(255, 218, 61, 22),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 10,
-            duration: Duration(seconds: 4),
-          ),
+        _showSnackBar(
+          'Kamu sudah mengirim CV ke pengguna ini. Tunggu responnya.',
+          color: Colors.orange,
+          icon: Icons.info_outline,
         );
         return;
       }
 
-      // 🔄 Siapkan pertanyaan
+      // ✅ Siapkan pertanyaan
       final List<Map<String, dynamic>> allQuestions = [];
 
       for (final questionId in selectedQuestionIds) {
@@ -854,6 +820,7 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
         final userQuestions = await userQuestionService.getUserQuestions(
           currentUser.id,
         );
+
         final lastCustom = userQuestions.lastWhere(
           (q) => q['custom_question_text'] == customQuestion.trim(),
           orElse: () => <String, dynamic>{},
@@ -869,72 +836,63 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
         }
       }
 
-      // 🚀 Kirim proposal taaruf
+      // ✅ Kirim proposal
       final result = await userQuestionService.submitTaarufProposal(
         requesterId: currentUser.id,
         requestedId: widget.targetUserId,
         questions: allQuestions,
       );
 
-      if (result == 'PENGAJUAN_SUDAH_ADA') {
-        throw Exception('duplikat');
-      } else if (result == 'ERROR') {
-        throw Exception('match');
-      }
+      if (result != 'OK') throw Exception("submit");
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Lamaran taaruf berhasil dikirim ke ${widget.targetUserName}',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      _showSnackBar(
+        'Lamaran taaruf berhasil dikirim ke ${widget.targetUserName}',
+        color: Colors.green,
+        icon: Icons.check_circle_outline,
       );
     } catch (e) {
       if (!mounted) return;
+      Navigator.pop(context);
       String errorMessage = 'Gagal mengirim lamaran.';
-
       if (e.toString().contains('terautentikasi')) {
         errorMessage = 'Silakan login terlebih dahulu.';
       } else if (e.toString().contains('custom')) {
         errorMessage = 'Pertanyaan custom gagal disimpan. Coba lagi.';
-      } else if (e.toString().contains('duplikat')) {
-        errorMessage =
-            'Pengajuan taaruf dari pengguna ini masih tertunda. Mohon respon terlebih dahulu.';
-      } else if (e.toString().contains('match')) {
-        errorMessage =
-            'Terjadi kesalahan saat mengirim lamaran. Coba beberapa saat lagi.';
+      } else if (e.toString().contains('submit')) {
+        errorMessage = 'Terjadi kesalahan saat mengirim lamaran.';
       }
 
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 10,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      _showSnackBar(errorMessage, color: Colors.red, icon: Icons.error_outline);
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  void _showSnackBar(
+    String message, {
+    Color color = Colors.red,
+    IconData? icon,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon ?? Icons.info_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(message, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 10,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override
@@ -996,10 +954,15 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
                   value: isSelected,
                   onChanged: (bool? value) {
                     setState(() {
-                      if (value == true && selectedQuestionIds.length < 3) {
-                        selectedQuestionIds.add(question['id']);
-                      } else if (value == false) {
-                        selectedQuestionIds.remove(question['id']);
+                      final id = question['id'];
+
+                      if (value == true) {
+                        if (!selectedQuestionIds.contains(id) &&
+                            selectedQuestionIds.length < 5) {
+                          selectedQuestionIds.add(id);
+                        }
+                      } else {
+                        selectedQuestionIds.remove(id);
                       }
                     });
                   },
