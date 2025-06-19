@@ -71,7 +71,6 @@ class UserQuestionService {
 
       return response['id']?.toString();
     } catch (e) {
-      print('❌ Error addUserQuestion: $e');
       return null;
     }
   }

@@ -789,6 +789,8 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
           .eq('status', 'pending');
 
       if (sentToTarget.length >= 2) {
+        if (!mounted) return;
+        Navigator.pop(context);
         _showSnackBar(
           'Kamu sudah mengirim lamaran ke pengguna ini maksimal 2 kali. Tunggu responnya.',
           color: Colors.orange,
@@ -845,6 +847,8 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
       );
 
       if (result == 'PENGAJUAN_SUDAH_ADA') {
+        if (!mounted) return;
+        Navigator.pop(context);
         _showSnackBar(
           'Target pengguna sudah mengirim lamaran ke kamu. Cek inbox untuk merespons.',
           color: Colors.orange,
@@ -854,6 +858,8 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
       }
 
       if (result == 'MAX_PENGAJUAN') {
+        if (!mounted) return;
+        Navigator.pop(context);
         _showSnackBar(
           'Kamu hanya bisa mengirim maksimal 2 lamaran yang belum direspon.',
           color: Colors.orange,
@@ -864,6 +870,7 @@ class _TaarufProposalFormState extends State<TaarufProposalForm> {
 
       if (result != 'OK') throw Exception("Gagal mengirim lamaran");
 
+      if (!mounted) return;
       Navigator.pop(context);
       _showSnackBar(
         'Lamaran taaruf berhasil dikirim ke ${widget.targetUserName}',
