@@ -213,7 +213,7 @@ class _ProfileState extends State<Profile> {
                 Icon(genderIcon, color: Colors.white, size: 24),
                 const SizedBox(width: 4),
                 Text(
-                  "$age, $job",
+                  "${age ?? "umur"}, ${job ?? "pekerjaan"}",
                   style: const TextStyle(
                     fontWeight: FontWeight.w400,
                     fontSize: 14,

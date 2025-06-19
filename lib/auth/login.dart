@@ -51,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-
       // Contoh Supabase login (aktifkan jika Supabase siap)
       // final response = await supabase.auth.signInWithPassword(
       //   email: email,
@@ -77,8 +76,6 @@ class _LoginPageState extends State<LoginPage> {
 
       final googleUser =
           await GoogleSignIn(serverClientId: webClientId).signIn();
-          
-
       if (googleUser == null) return;
 
       final googleAuth = await googleUser.authentication;
@@ -95,8 +92,30 @@ class _LoginPageState extends State<LoginPage> {
         accessToken: accessToken,
       );
 
-      if (response.user == null) throw 'Login ke Supabase gagal: User null';
+      final user = response.user;
+      if (user == null) throw 'Login ke Supabase gagal: User null';
 
+      // ✅ Tambahkan ke tabel `profiles` jika belum ada
+      final profileCheck =
+          await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', user.id)
+              .maybeSingle();
+
+      if (profileCheck == null) {
+        final fullName = user.userMetadata?['name'] ?? 'Pengguna Baru';
+        final now = DateTime.now().toIso8601String();
+
+        await supabase.from('profiles').insert({
+          'id': user.id,
+          'full_name': fullName,
+          'created_at': now,
+          'updated_at': now,
+        });
+      }
+
+      // 🚀 Navigasi ke halaman utama
       Get.offNamed(AppRoutes.beranda);
     } catch (e) {
       Get.snackbar('Login Gagal', e.toString());
@@ -247,9 +266,7 @@ class _LoginPageState extends State<LoginPage> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {
-                
-              },
+              onPressed: () {},
               child: Text(
                 'Lupa password?',
                 style: GoogleFonts.poppins(
